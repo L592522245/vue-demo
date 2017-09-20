@@ -3,16 +3,17 @@
 <head>
 	<meta charset="utf-8">
 	<title>vue介绍</title>
+	<script type="text/javascript" src="js/vue.js"></script>
+	<style type="text/css">
+		span {
+			color: #444;
+			font-size: 14px;
+		}
+		img {
+			width: 600px;
+		}
+	</style>
 </head>
-<style type="text/css">
-	span {
-		color: #444;
-		font-size: 14px;
-	}
-	img {
-		width: 600px;
-	}
-</style>
 <body>
 	<!-- v-bind 指令，它们会在渲染的DOM上应用特殊的响应式行为 -->
 	<div id="msg" v-bind:title="title">
@@ -23,6 +24,9 @@
 
 		<!-- v-on 指令绑定一个事件监听器 -->
 		<button v-on:click="reverseMessage">逆转消息</button>
+		
+		<p v-if="seen">Now you see me</p>
+		<p v-else>Now you don't</p>
 	</div>
 
 	<!-- 条件与循环 -->
@@ -32,6 +36,24 @@
 				{{ todo.text }}
 			</li>
 		</ol>
+	</div>
+
+	<div id="todo-list-example">
+		<span>{{ message }}</span>
+		<input
+			v-model="newTodoText"
+			@keyup.enter="addNewTodo"
+			placeholder="Add a todo"
+		>
+		<ul>
+      		 <li
+      		 	is="todo-item2"
+      		 	v-for="(todo, index) in todos"
+      		 	:key="todo.id"
+      		 	:title="todo.title"
+      		 	@remove="todos.splice(index, 1)"
+      		 ></li>
+		</ul>
 	</div>
 
 	<!-- 组件化应用构建 -->
@@ -59,6 +81,18 @@
 
 	<p>v-bind 缩写 : </p>
 	<p>v-on 缩写 @ </p>
+	<!-- v-on监听事件 -->
+	<div id="v-on-example">
+		<button @click="plus">增加1</button>
+		<p>这个按钮被点击了{{ counter }}次</p>
+	</div>
+
+	<!-- 组件中 data 必须是一个函数 -->
+	<div id="component-example">
+		<simple-counter></simple-counter>
+		<simple-counter></simple-counter>
+		<simple-counter></simple-counter>
+	</div>
 
 	<!-- 所有的 Vue 组件都是 Vue 实例 -->
 	<p>创建Vue实例：var vm = new Vue({})</p>
@@ -66,13 +100,13 @@
 	<p>Vue生命周期示意图</p>
 	<img src="img/lifecycle.png">
 
-	<script type="text/javascript" src="js/vue.js"></script>
 	<script type="text/javascript">
 		var app = new Vue({
 			el: '#msg',
 			data: {
 				message: 'Hello Vue!',
-				title: '页面加载于 ' + new Date().toLocaleString()
+				title: '页面加载于 ' + new Date().toLocaleString(),
+				seen: Math.random() > 0.5
 			},
 			methods: {
 				reverseMessage: function () {
@@ -81,6 +115,7 @@
 			}
 		})
 
+		// v-for
 		var app2 = new Vue({
 			el: '#list',
 			data: {
@@ -89,6 +124,45 @@
 					{ text: '学习 Vue' },
 					{ text: '整个项目' }
 				]
+			}
+		})
+
+		// todo-list
+		Vue.component('todo-item2', {
+			template: '\
+				<li>\
+					{{ title }}\
+					<button @click="$emit(\'remove\')">x</button>\
+				</li>\
+			',
+			props: ['title']
+		})
+
+		new Vue({
+			el: '#todo-list-example',
+			data: {
+				message: '一个v-for组件',
+				newTodoText: '',
+				todos: [
+					{
+						id: 1,
+						title: 'Do the dishes',
+					},
+					{
+						id: 2,
+						title: 'Take out the trash',
+					}
+				],
+				nextTodoId: 3
+			},
+			methods: {
+				addNewTodo: function () {
+					this.todos.push({
+						id: this.nextTodoId++,
+						title: this.newTodoText
+					})
+					this.newTodoText = ''
+				}
 			}
 		})
 
@@ -111,6 +185,33 @@
 					{ id: 2, text: '生鲜' }
 				]
 			}
+		})
+
+		new Vue({
+			el: '#v-on-example',
+			data: {
+				counter: 0
+			},
+			methods: {
+				plus: function () {
+					return this.counter += 1
+				}
+			}
+		})
+
+		// 组件中 data 必须是一个函数
+		// 要确保在初始化根实例之前注册了组件
+		Vue.component('simple-counter', {
+			template: '<button @click="counter += 1">{{ counter }}</button>',
+			data: function () {
+				return {
+					counter: 0
+				}
+			}
+		})
+
+		new Vue({
+			el: '#component-example'
 		})
 	</script>
 </body>
