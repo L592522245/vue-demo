@@ -30,6 +30,7 @@
 	</div>
 
 	<!-- 条件与循环 -->
+	<p>循环v-for实例：</p>
 	<div id="list">
 		<ol>
 			<li v-for="todo in todos">
@@ -82,6 +83,7 @@
 	<p>v-bind 缩写 : </p>
 	<p>v-on 缩写 @ </p>
 	<!-- v-on监听事件 -->
+	<p>组件实例：</p>
 	<div id="v-on-example">
 		<button @click="plus">增加1</button>
 		<p>这个按钮被点击了{{ counter }}次</p>
@@ -98,10 +100,35 @@
 		使用 $on(eventName) 监听事件
 		使用 $emit(eventName) 触发事件
 	-->
+	<p>$on、$emit实例：</p>
 	<div id="counter-event-example">
 		<p>{{ total }}</p>
 		<button-counter @increment="incrementTotal"></button-counter>
 		<button-counter @increment="incrementTotal"></button-counter>
+	</div>
+
+	<p>插槽slot实例：</p>
+	<div class="container">
+		<header>
+			<slot name="header"></slot>
+		</header>
+		<main>
+			<slot></slot>
+		</main>
+		<footer>
+			<slot name="footer"></slot>
+		</footer>
+	</div>
+	<app-layout>
+		<h1 slot="header">这里可能是一个页面标题</h1>
+		<p>主要内容的一个段落。</p>
+		<p>另一个主要段落。</p>
+		<p slot="footer">这里有一些联系信息</p>
+	</app-layout>
+
+	<p>子组件索引实例：</p>
+	<div id="parent">
+		<user-profile ref="profile"></user-profile>
 	</div>
 
 	<!-- 所有的 Vue 组件都是 Vue 实例 -->
@@ -250,6 +277,12 @@
                 }
 			}
 		})
+
+		var parent = new Vue({
+			el: '#parent'
+		})
+		// 访问子组件
+		var child = parent.$refs.profile
 	</script>
 </body>
 </html>
