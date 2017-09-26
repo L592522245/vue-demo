@@ -12,6 +12,24 @@
 		img {
 			width: 600px;
 		}
+		.fade-enter-active, .fade-leave-active {
+			transition: opacity .5s
+		}
+		.fade-enter, .fade-leave-to /* .fade-leave-active in below version 2.1.8 */ {
+			opacity: 0
+		}
+		.list-item {
+			transition: all 1s;
+			display: inline-block;
+			margin-right: 10px;
+		}
+		.list-leave-active {
+			position: absolute;
+		}
+		.list-enter, .list-leave-to {
+			opacity: 0;
+			transform: translateY(20px);
+		}
 	</style>
 </head>
 <body>
@@ -131,12 +149,55 @@
 		<user-profile ref="profile"></user-profile>
 	</div>
 
+	<p>动画1：</p>
+	<div id="transitionDemo">
+		<button @click="show = !show">toggle</button>
+		<transition name="fade">
+			<p v-if="show">hello</p>
+		</transition>
+	</div>
+
+	<p>动画2：</p>
+	<div id="listDemo">
+		<button @click="shuffle">shuffle</button>
+		<button @click="add">add</button>
+		<button @click="remove">remove</button>
+		<transition-group name="list" tag="p">
+			<span v-for="item in items" :key="item" class="list-item">
+				{{ item }}
+			</span>
+		</transition-group>
+	</div>
+
+	<p>动画3：</p>
+	<div id="staggered-list-demo">
+		<input v-model="query">
+		<transition-group
+			name="staggered-fade"
+			tag="ul"
+			:css="false"
+			@before-enter="beforeEnter"
+			@enter="enter"
+			@leave="leave"
+		>
+			<li
+				v-for="(item, index) in computedList"
+				:key="item.msg"
+				:data-index="index"
+			>
+				{{ item.msg }}
+			</li>
+		</transition-group>
+	</div>
+
 	<!-- 所有的 Vue 组件都是 Vue 实例 -->
 	<p>创建Vue实例：var vm = new Vue({})</p>
 
 	<p>Vue生命周期示意图</p>
 	<img src="img/lifecycle.png">
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
 	<script type="text/javascript">
 		var app = new Vue({
 			el: '#msg',
@@ -283,6 +344,85 @@
 		})
 		// 访问子组件
 		var child = parent.$refs.profile
+
+		// 动画1
+		new Vue({
+			el: '#transitionDemo',
+			data: {
+			    show: true
+			}
+		})
+
+		// 动画2
+		new Vue({
+			el: '#listDemo',
+			data: {
+			    items: [1,2,3,4,5,6,7,8,9],
+				nextNum: 10
+			},
+			methods: {
+			    randomIndex: function () {
+			        return Math.floor(Math.random() * this.items.length)
+				},
+				add: function () {
+			        this.items.splice(this.randomIndex(), 0, this.nextNum++)
+				},
+				remove: function () {
+			        this.items.splice(this.randomIndex(), 1)
+				},
+				shuffle: function () {
+			        this.items = _.shuffle(this.items)
+				}
+			}
+		})
+
+		// 动画3
+		new Vue({
+			el: '#staggered-list-demo',
+			data: {
+			    query: '',
+                list: [
+					{ msg: 'Harden'},
+					{ msg: 'Gorden'},
+					{ msg: 'Paul' },
+					{ msg: 'Anderson'}
+				]
+			},
+			computed: {
+                computedList: function () {
+			        var vm = this
+					return this.list.filter(function (item) {
+					    return item.msg.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1
+					})
+				}
+			},
+			methods: {
+			    beforeEnter: function (el) {
+					el.style.opacity = 0
+					el.style.height = 0
+        		},
+				enter: function (el, done) {
+			        var delay = el.dataset.index * 150
+					setTimeout(function () {
+					    Velocity(
+					        el,
+							{ opacity: 1, height: '1.6em'},
+							{ complete: done}
+						)
+					}, delay)
+				},
+				leave: function (el, done) {
+                    var delay = el.dataset.index * 150
+                    setTimeout(function () {
+                        Velocity(
+                            el,
+                            { opacity: 0, height: 0},
+                            { complete: done}
+                        )
+                    }, delay)
+				}
+			}
+		})
 	</script>
 </body>
 </html>
